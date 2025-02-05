@@ -69,8 +69,8 @@ applications.each_with_index do |application, index|
   documents_link = application.at_css('.plan-file-list__item') ? application.at_css('.plan-file-list__item')['href'] : nil
 
   # Extract the application and closing date from the description or other parts
-  date_received = description&.match(/(\d{1,2} [A-Za-z]+ \d{4})/) ? Date.strptime(description.match(/(\d{1,2} [A-Za-z]+ \d{4})/)[1], '%d %B %Y').strftime('%Y-%m-%d') : nil
-  on_notice_to = description&.match(/(\d{1,2} [A-Za-z]+ \d{4})/) ? Date.strptime(description.match(/(\d{1,2} [A-Za-z]+ \d{4})/)[1], '%d %B %Y').strftime('%Y-%m-%d') : nil
+  date_received = description.match(/(\d{1,2} [A-Za-z]+ \d{4})/) ? Date.strptime(description.match(/(\d{1,2} [A-Za-z]+ \d{4})/)[1], '%d %B %Y').strftime('%Y-%m-%d') : nil
+  on_notice_to = description.match(/(\d{1,2} [A-Za-z]+ \d{4})/) ? Date.strptime(description.match(/(\d{1,2} [A-Za-z]+ \d{4})/)[1], '%d %B %Y').strftime('%Y-%m-%d') : nil
 
   date_scraped = Date.today.to_s
 
