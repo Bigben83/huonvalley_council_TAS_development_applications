@@ -72,18 +72,27 @@ applications.each_with_index do |application, index|
   date_received = description.match(/(\d{1,2} [A-Za-z]+ \d{4})/) ? Date.strptime(description.match(/(\d{1,2} [A-Za-z]+ \d{4})/)[1], '%d %B %Y').strftime('%Y-%m-%d') : nil
   on_notice_to = description.match(/(\d{1,2} [A-Za-z]+ \d{4})/) ? Date.strptime(description.match(/(\d{1,2} [A-Za-z]+ \d{4})/)[1], '%d %B %Y').strftime('%Y-%m-%d') : nil
 
+  # Extract the title_reference from the description (if it exists in the format "(CT-158070/4)")
+  title_reference = description ? description.match(/\(CT-(\d+\/\d+)\)/) : nil
+  title_reference = title_reference ? title_reference[1] : nil
+
+  # Extract the address from the href link (url decoding the query parameter)
+  address_link = application.at_css('.static-map') ? application.at_css('.static-map')['href'] : nil
+  address = address_link ? CGI.parse(address_link)["query"][0] : nil
+  address = address ? CGI.unescape(address) : nil
+  
   date_scraped = Date.today.to_s
 
   # Log the extracted data for debugging purposes
-  logger.info("Extracted Data: #{council_reference}, #{description}, #{document_description}, #{council_reference}, #{date_received}, #{on_notice_to}")
+  logger.info("Extracted Data: #{council_reference}, #{description}, #{document_description}, #{council_reference}, #{date_received}, #{on_notice_to}, #{title_reference}")
 
   # Step 6: Ensure the entry does not already exist before inserting
-    existing_entry = db.execute("SELECT * FROM huon_valley WHERE council_reference = ?", council_reference )
+  existing_entry = db.execute("SELECT * FROM huon_valley WHERE council_reference = ?", council_reference )
 
   if existing_entry.empty? # Only insert if the entry doesn't already exist
   # Step 5: Insert the data into the database
-  db.execute("INSERT INTO huon_valley (council_reference, description, document_description, date_received, on_notice_to, date_scraped) VALUES (?, ?, ?, ?, ?, ?)",
-             [council_reference, description, document_description, date_received, on_notice_to, date_scraped])
+  db.execute("INSERT INTO huon_valley (council_reference, address, description, document_description, date_received, on_notice_to, title_reference, date_scraped) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+             [council_reference, address, description, document_description, date_received, on_notice_to, title_reference, date_scraped])
 
   logger.info("Data for #{council_reference} saved to database.")
     else
