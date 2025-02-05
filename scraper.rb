@@ -66,7 +66,7 @@ applications.each_with_index do |application, index|
   # Extract the application details
   council_reference = application.at_css('.accordion-grid-item__title') ? application.at_css('.accordion-grid-item__title').text.strip : nil
   description = application.at_css('.accordion-grid-item__description') ? application.at_css('.accordion-grid-item__description').text.strip : nil
-  documents_link = application.at_css('.plan-file-list__item') ? application.at_css('.plan-file-list__item')['href'] : nil
+  document_description = application.at_css('.plan-file-list__item') ? application.at_css('.plan-file-list__item')['href'] : nil
 
   # Extract the application and closing date from the description or other parts
   date_received = description.match(/(\d{1,2} [A-Za-z]+ \d{4})/) ? Date.strptime(description.match(/(\d{1,2} [A-Za-z]+ \d{4})/)[1], '%d %B %Y').strftime('%Y-%m-%d') : nil
@@ -75,15 +75,15 @@ applications.each_with_index do |application, index|
   date_scraped = Date.today.to_s
 
   # Log the extracted data for debugging purposes
-  logger.info("Extracted Data: #{council_reference}, #{description}, #{documents_link}, #{council_reference}, #{date_received}, #{on_notice_to}")
+  logger.info("Extracted Data: #{council_reference}, #{description}, #{document_description}, #{council_reference}, #{date_received}, #{on_notice_to}")
 
   # Step 6: Ensure the entry does not already exist before inserting
     existing_entry = db.execute("SELECT * FROM huon_valley WHERE council_reference = ?", council_reference )
 
   if existing_entry.empty? # Only insert if the entry doesn't already exist
   # Step 5: Insert the data into the database
-  db.execute("INSERT INTO huon_valley (council_reference, description, documents, date_received, on_notice_to, date_scraped) VALUES (?, ?, ?, ?, ?, ?)",
-             [council_reference, description, documents_link, date_received, on_notice_to, date_scraped])
+  db.execute("INSERT INTO huon_valley (council_reference, description, document_description, date_received, on_notice_to, date_scraped) VALUES (?, ?, ?, ?, ?, ?)",
+             [council_reference, description, document_description, date_received, on_notice_to, date_scraped])
 
   logger.info("Data for #{council_reference} saved to database.")
     else
