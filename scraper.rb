@@ -3,6 +3,7 @@ require 'open-uri'
 require 'sqlite3'
 require 'logger'
 require 'date'
+require 'cgi'
 
 # Initialize the logger
 logger = Logger.new(STDOUT)
