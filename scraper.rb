@@ -64,12 +64,9 @@ applications = doc.css('.accordion-grid-item')
 
 applications.each_with_index do |application, index|
   # Extract the application details
-  application_id = application.at_css('.accordion-grid-item__title').text.strip
-  description = application.at_css('.accordion-grid-item__description').text.strip
-  documents_link = application.at_css('.plan-file-list__item')&.[]('href')
-
-  # If documents link exists, extract the council reference
-  council_reference = documents_link&.match(/\/([A-Za-z0-9-]+)_Exhibited_Documents/) ? documents_link.match(/\/([A-Za-z0-9-]+)_Exhibited_Documents/)[1].gsub('-', '/') : nil
+  council_reference = application.at_css('.accordion-grid-item__title') ? application.at_css('.accordion-grid-item__title').text.strip : nil
+  description = application.at_css('.accordion-grid-item__description') ? application.at_css('.accordion-grid-item__description').text.strip : nil
+  documents_link = application.at_css('.plan-file-list__item') ? application.at_css('.plan-file-list__item')['href'] : nil
 
   # Extract the application and closing date from the description or other parts
   date_received = description&.match(/(\d{1,2} [A-Za-z]+ \d{4})/) ? Date.strptime(description.match(/(\d{1,2} [A-Za-z]+ \d{4})/)[1], '%d %B %Y').strftime('%Y-%m-%d') : nil
@@ -78,19 +75,19 @@ applications.each_with_index do |application, index|
   date_scraped = Date.today.to_s
 
   # Log the extracted data for debugging purposes
-  logger.info("Extracted Data: #{application_id}, #{description}, #{documents_link}, #{council_reference}, #{date_received}, #{on_notice_to}")
+  logger.info("Extracted Data: #{council_reference}, #{description}, #{documents_link}, #{council_reference}, #{date_received}, #{on_notice_to}")
 
   # Step 6: Ensure the entry does not already exist before inserting
-    existing_entry = db.execute("SELECT * FROM huon_valley WHERE council_reference = ?", application_id )
+    existing_entry = db.execute("SELECT * FROM huon_valley WHERE council_reference = ?", council_reference )
 
   if existing_entry.empty? # Only insert if the entry doesn't already exist
   # Step 5: Insert the data into the database
-  db.execute("INSERT INTO huon_valley (application_id, description, documents, council_reference, date_received, on_notice_to, date_scraped) VALUES (?, ?, ?, ?, ?, ?, ?)",
-             [application_id, description, documents_link, council_reference, date_received, on_notice_to, date_scraped])
+  db.execute("INSERT INTO huon_valley (council_reference, description, documents, date_received, on_notice_to, date_scraped) VALUES (?, ?, ?, ?, ?, ?, ?)",
+             [council_reference, description, documents_link, date_received, on_notice_to, date_scraped])
 
-  logger.info("Data for #{application_id} saved to database.")
+  logger.info("Data for #{council_reference} saved to database.")
     else
-      logger.info("Duplicate entry for application #{application_id} found. Skipping insertion.")
+      logger.info("Duplicate entry for application #{council_reference} found. Skipping insertion.")
     end
 end
 
