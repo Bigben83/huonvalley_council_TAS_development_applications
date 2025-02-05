@@ -64,8 +64,8 @@ applications = doc.css('.accordion-grid-item')
 
 applications.each_with_index do |application, index|
   # Extract the application details
-  application_id = application.at_css('.accordion-grid-item__title')&.text.strip
-  description = application.at_css('.accordion-grid-item__description')&.text.strip
+  application_id = application.at_css('.accordion-grid-item__title').text.strip
+  description = application.at_css('.accordion-grid-item__description').text.strip
   documents_link = application.at_css('.plan-file-list__item')&.[]('href')
 
   # If documents link exists, extract the council reference
